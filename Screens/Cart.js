@@ -1,5 +1,6 @@
 import { StyleSheet, Text, View, Image, TextInput, TouchableOpacity, FlatList } from 'react-native';
 import React, { useState } from 'react';
+import { useNavigation } from '@react-navigation/native';
 
 const Cart = () => {
 
@@ -64,6 +65,7 @@ const Cart = () => {
     },
   ]);
 
+  const navigation = useNavigation();
   // Grand Total Calculation
   const grandTotal = cartItems.reduce((sum, item) => sum + item.subtotal, 0);
 
@@ -142,7 +144,7 @@ const Cart = () => {
           <View style={styles.btnRow}>
 
             {/* continue shopping */}
-            <TouchableOpacity style={styles.btnLight}>
+            <TouchableOpacity style={styles.btnLight} onPress={()=> navigation.navigate('ProductsList')}>
               <Text>Continue Shopping</Text>
             </TouchableOpacity>
 
@@ -184,7 +186,7 @@ const Cart = () => {
         <>
         <View style={styles.noProducts}>
           <Text style={styles.text}>Your cart is empty.</Text>
-          <TouchableOpacity style={styles.btnDark}>
+          <TouchableOpacity style={styles.btnDark} onPress={()=> navigation.navigate('ProductsList')}>
             <Text style={styles.btnDarkText}>Browse Products</Text>
           </TouchableOpacity>
           </View>

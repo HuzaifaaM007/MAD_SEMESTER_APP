@@ -61,7 +61,7 @@ const ProductDetails = ({ productid }) => {
           
             // Customer Add to Cart
            { product.stock > 0 ? (
-              <TouchableOpacity style={[styles.cartBtn]}>
+              <TouchableOpacity style={[styles.cartBtn]} onPress={() => navigation.navigate('Cart')}>
                 <Text style={styles.cartText}>Add to Cart</Text>
               </TouchableOpacity>
             ) : (
