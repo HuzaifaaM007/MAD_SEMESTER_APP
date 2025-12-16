@@ -1,63 +1,38 @@
 import { StyleSheet, Text, View, Image, TouchableOpacity, FlatList } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import fetchData from '../utils/Api';
+import { useEffect, useState } from 'react';
 
 const ProductsList = ({ userId }) => {
 
+  const [mobiles, setMobiles] = useState  ([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect( ()=>{
+    const loadData = async () => {
+      try {
+        const data = await fetchData();
+        setMobiles(data);
+      } catch (err) {
+        console.log("Error fetching mobiles:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, []
+  )
+
   const products = [
-    {
-      id: 1,
-      name: "Wireless Headphones",
-      description: "High-quality wireless headphones with noise cancellation feature.",
-      price: 49.99,
-      published: 1,
-      image: "https://images.unsplash.com/photo-1580894908361-967195033f48",
-      stock: 10,
-    },
-    {
-      id: 2,
-      name: "Smart Watch",
-      description: "Fitness tracking smart watch with heart rate and sleep monitor.",
-      price: 79.99,
-      published: 1,
-      image: "https://images.unsplash.com/photo-1519744792095-2f2205e87b6f",
-      stock: 0, // out of stock
-    },
-    {
-      id: 3,
-      name: "Bluetooth Speaker",
-      description: "Portable speaker with deep bass and HD sound quality.",
-      price: 29.99,
-      published: 1,
-      image: "https://images.unsplash.com/photo-1484704849700-f032a568e944",
-      stock: 14,
-    },
-    {
-      id: 4,
-      name: "Gaming Mouse",
-      description: "RGB gaming mouse with fast response and ergonomic design.",
-      price: 24.49,
-      published: 1,
-      image: "https://images.unsplash.com/photo-1584270354949-1e15d5e1c8e2",
-      stock: 5,
-    },
-    {
-      id: 5,
-      name: "Laptop Backpack",
-      description: "Waterproof backpack with padded compartments for laptop and accessories.",
-      price: 34.99,
-      published: 1,
-      image: "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f",
-      stock: 7,
-    },
-    {
-      id: 6,
-      name: "USB-C Fast Charger",
-      description: "25W fast charging adapter for Android and iOS devices.",
-      price: 12.99,
-      published: 1,
-      image: "https://images.unsplash.com/photo-1602080858428-57174f95f262",
-      stock: 20,
-    },
+     {
+    Brand: 'SAMSUNG Galaxy F14 5G (B.A.E. Purple, 128 GB)',
+    Description: '6 GB RAM | 128 GB ROM | Expandable Upto 1 TB16.76 cm (6.6 inch) Full HD+ Display50MP + 2MP | 13MP Front Camera6000 mAh BatteryExynos 1330, Octa Core Processor1 Year Manufacturer Warranty for Device and 6 Months Manufacturer Warranty for In-Box Accessories',
+    Image: 'https://rukminim2.flixcart.com/image/312/312/xif0q/mobile/k/2/x/-original-imagtyxg7mdjhfqm.jpeg?q=70',      
+    Price: '₹12,490',
+    Tag: 'Mobile, Electronics',
+    'Unnamed: 0': 10
+  },
   ]
 
   const navigation = useNavigation();
@@ -70,9 +45,9 @@ const ProductsList = ({ userId }) => {
 
         {/* Product Image */}
         <View style={styles.imageContainer}>
-          {item.image ? (
+          {item.Image ? (
             <Image
-              source={{ uri: item.image }}
+              source={{ uri: item.Image }}
               style={styles.image}
               resizeMode="contain"
             />
@@ -82,16 +57,16 @@ const ProductsList = ({ userId }) => {
         </View>
 
         {/* Product Name */}
-        <Text style={styles.name}>{item.name}</Text>
+        <Text style={styles.name}>{item.Brand}</Text>
 
         {/* Short Description */}
-        <Text style={styles.description}>
-          {item.description.substring(0, 60)}...
+        <Text style={styles.Description}>
+          {item.Description.substring(0, 60)}...
         </Text>
 
         {/* Price & View */}
         <View style={styles.row}>
-          <Text style={styles.price}>${item.price.toFixed(2)}</Text>
+          <Text style={styles.price}>${item.Price.toFixed(2)}</Text>
 
           <TouchableOpacity style={styles.viewBtn} onPress={() => navigation.navigate('ProductDetails')}>
             <Text style={styles.viewText}>View</Text>
@@ -122,7 +97,7 @@ const ProductsList = ({ userId }) => {
       <Text style={styles.heading}>Our Products</Text>
 
       <FlatList
-        data={products}
+        data={mobiles}
         renderItem={renderItem}
         keyExtractor={(item) => item.id.toString()}
         numColumns={2} // grid
