@@ -1,18 +1,14 @@
 import { StyleSheet, Text, View, Image, TouchableOpacity, ScrollView } from 'react-native';
 import React from 'react';
+import { useRoute, useNavigation } from '@react-navigation/native';
 
-const ProductDetails = ({ productid }) => {
-  const product = 
-    {
-      id: 1,
-      name: "Wireless Headphones",
-      description: "High-quality wireless headphones with noise cancellation feature.",
-      price: 49.99,
-      published: 1,
-      image: "https://images.unsplash.com/photo-1580894908361-967195033f48",
-      stock: 10,
-    };
+const ProductDetails = () => {
   
+  const route = useRoute();
+  const navigation = useNavigation();
+
+  const { product } = route.params || {};
+
   if (!product) {
     return (
       <View style={styles.center}>
@@ -27,9 +23,9 @@ const ProductDetails = ({ productid }) => {
 
         {/* Product Image */}
         <View style={styles.imageContainer}>
-          {product.image ? (
+          {product.Image ? (
             <Image
-              source={{ uri: product.image }}
+              source={{ uri: product.Image }}
               style={styles.image}
             />
           ) : (
@@ -39,38 +35,23 @@ const ProductDetails = ({ productid }) => {
 
         {/* Product Details */}
         <View style={styles.detailsContainer}>
-          <Text style={styles.title}>{product.name}</Text>
+          <Text style={styles.title}>{product.Brand}</Text>
 
-          <Text style={styles.description}>{product.description}</Text>
+          <Text style={styles.description}>{product.Description}</Text>
 
-          <Text style={styles.price}>${product.price.toFixed(2)}</Text>
+          <Text style={styles.price}>{product.Price}</Text>
 
           <Text style={styles.stockLabel}>
-            Stock:{' '}
-            {product.stock > 0 ? (
-              <Text style={styles.inStock}>{product.stock} available</Text>
-            ) : (
-              <Text style={styles.outOfStock}>Out of stock</Text>
-            )}
+            Stock: <Text style={styles.inStock}>Available</Text>
           </Text>
 
-          <Text style={styles.date}>
-            Added on: {product.created_at}
-          </Text>
-
-          
-            // Customer Add to Cart
-           { product.stock > 0 ? (
-              <TouchableOpacity style={[styles.cartBtn]} onPress={() => navigation.navigate('Cart')}>
-                <Text style={styles.cartText}>Add to Cart</Text>
-              </TouchableOpacity>
-            ) : (
-              <TouchableOpacity disabled style={[styles.disabledBtn]}>
-                <Text style={styles.disabledText}>Out of Stock</Text>
-              </TouchableOpacity>
-            )}
-          
-
+          {/* Add to Cart */}
+          <TouchableOpacity
+            style={styles.cartBtn}
+            onPress={() => navigation.navigate('Cart', {product: product})}
+          >
+            <Text style={styles.cartText}>Add to Cart</Text>
+          </TouchableOpacity>
         </View>
 
       </View>
@@ -85,8 +66,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: 'column',
     gap: 20,
   },
   imageContainer: {
@@ -128,28 +108,6 @@ const styles = StyleSheet.create({
   outOfStock: {
     color: 'red',
   },
-  date: {
-    color: '#777',
-    marginBottom: 20,
-  },
-  row: {
-    flexDirection: 'row',
-    gap: 10,
-    flexWrap: 'wrap',
-  },
-  btn: {
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 6,
-  },
-  btnText: {
-    color: 'white',
-    fontWeight: 'bold',
-  },
-  edit: { backgroundColor: 'green' },
-  unpublish: { backgroundColor: 'orange' },
-  delete: { backgroundColor: 'red' },
-
   cartBtn: {
     backgroundColor: 'black',
     padding: 15,
@@ -161,17 +119,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontWeight: 'bold',
   },
-
-  disabledBtn: {
-    backgroundColor: 'gray',
-    padding: 15,
-    borderRadius: 8,
-  },
-  disabledText: {
-    color: 'white',
-    textAlign: 'center',
-  },
-
   center: {
     marginTop: 50,
     alignItems: 'center',
