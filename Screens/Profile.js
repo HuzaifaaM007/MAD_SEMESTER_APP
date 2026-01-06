@@ -1,13 +1,17 @@
 import React from "react";
 import { StyleSheet, Text, View, ScrollView } from "react-native";
+import { useRoute } from '@react-navigation/native';
 
-const UserProfile = ({ user }) => {
+const UserProfile = () => {
+
+  const route = useRoute();
+  const user = route.params?.user;
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.heading}>User Profile</Text>
 
       <View style={styles.card}>
-        {/* Personal Information */}
+        
         <View style={styles.section}>
           <Text style={styles.sectionHeading}>Personal Information</Text>
 
