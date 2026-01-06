@@ -169,9 +169,18 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
     borderWidth: 1,
-    borderColor: '#e0e0e0'
+    borderColor: '#e0e0e0',
   },
 
+  ordersIcon: {
+    fontSize: 22
+  },
+
+  profileBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'white',
   ordersIcon: {
     fontSize: 22
   },
@@ -206,7 +215,34 @@ const styles = StyleSheet.create({
 
   name: { fontSize: 16, fontWeight: '600', marginBottom: 4 },
   description: { fontSize: 12, color: '#666', flex: 1 },
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: '#e0e0e0'
+  },
 
+  profileIcon: {
+    fontSize: 24
+  },
+
+  gridRow: { justifyContent: 'space-between', marginBottom: 16 },
+
+  card: { backgroundColor: 'white', borderRadius: 10, padding: 12, width: '48%', minHeight: 260, shadowColor: '#000', elevation: 3 },
+
+  imageContainer: { height: 120, backgroundColor: '#f3f3f3', borderRadius: 8, justifyContent: 'center', alignItems: 'center', marginBottom: 10 },
+  image: { width: '90%', height: '90%' },
+  noImage: { color: '#999' },
+
+  name: { fontSize: 16, fontWeight: '600', marginBottom: 4 },
+  description: { fontSize: 12, color: '#666', flex: 1 },
+
+  row: { marginTop: 10, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  price: { fontSize: 16, fontWeight: 'bold', color: 'green' },
+  viewBtn: { backgroundColor: 'black', paddingVertical: 5, paddingHorizontal: 10, borderRadius: 5 },
+  viewText: { color: 'white', fontSize: 12 },
   row: { marginTop: 10, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   price: { fontSize: 16, fontWeight: 'bold', color: 'green' },
   viewBtn: { backgroundColor: 'black', paddingVertical: 5, paddingHorizontal: 10, borderRadius: 5 },
@@ -214,7 +250,11 @@ const styles = StyleSheet.create({
 
   cartBtn: { marginTop: 10, backgroundColor: 'green', paddingVertical: 10, borderRadius: 5 },
   cartText: { color: 'white', textAlign: 'center', fontWeight: '600' },
+  cartBtn: { marginTop: 10, backgroundColor: 'green', paddingVertical: 10, borderRadius: 5 },
+  cartText: { color: 'white', textAlign: 'center', fontWeight: '600' },
 
+  noProducts: { fontSize: 16, color: '#555' },
+  center: { alignItems: 'center', justifyContent: 'center', flex: 1 },
   noProducts: { fontSize: 16, color: '#555' },
   center: { alignItems: 'center', justifyContent: 'center', flex: 1 },
 });
