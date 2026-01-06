@@ -6,8 +6,7 @@ const LoginScreen1 = ({ navigation }) => {
   const [password, setPassword] = useState("");
 
   const handleLogin = () => {
-    // Handle your login logic here
-    // Example: navigation.navigate("ProductList")
+    
     console.log("Email:", email);
     console.log("Password:", password);
   };

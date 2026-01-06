@@ -1,12 +1,41 @@
-import React from "react";
-import { StyleSheet, Text, View, ScrollView, FlatList } from "react-native";
+import React, { useState, useEffect } from "react";
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from "react-native";
+import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const MyOrders = ({ orders, orderItems }) => {
+const MyOrders = () => {
+  const navigation = useNavigation();
+  const [orders, setOrders] = useState([]);
+
+  // Load orders from AsyncStorage
+  useEffect(() => {
+    const loadOrders = async () => {
+      try {
+        const savedOrders = await AsyncStorage.getItem('orders');
+        if (savedOrders) {
+          setOrders(JSON.parse(savedOrders));
+        }
+      } catch (err) {
+        console.log('Error loading orders:', err);
+      }
+    };
+    
+    loadOrders();
+
+    // Refresh orders when screen is focused
+    const unsubscribe = navigation.addListener('focus', () => {
+      loadOrders();
+    });
+
+    return unsubscribe;
+  }, [navigation]);
+
   const getStatusStyle = (status) => {
-    switch (status) {
-      case "Completed":
+    switch (status.toLowerCase()) {
+      case "completed":
         return styles.statusCompleted;
-      case "Pending":
+      case "pending":
+      case "confirmed":
         return styles.statusPending;
       default:
         return styles.statusOther;
@@ -14,50 +43,86 @@ const MyOrders = ({ orders, orderItems }) => {
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <View style={styles.container}>
       <Text style={styles.heading}>My Orders</Text>
 
       {orders.length === 0 ? (
-        <Text style={styles.empty}>You have not placed any orders yet.</Text>
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyIcon}>📦</Text>
+          <Text style={styles.emptyTitle}>No Orders Yet</Text>
+          <Text style={styles.emptyText}>You haven't placed any orders yet.</Text>
+          <TouchableOpacity
+            style={styles.shopBtn}
+            onPress={() => navigation.navigate('ProductsList')}
+          >
+            <Text style={styles.shopBtnText}>Start Shopping</Text>
+          </TouchableOpacity>
+        </View>
       ) : (
-        orders.map((order) => (
-          <View key={order.order_id} style={styles.orderCard}>
-            <View style={styles.orderHeader}>
-              <Text style={styles.orderTitle}>Order #{order.order_id}</Text>
-              <Text style={[styles.statusBadge, getStatusStyle(order.order_status)]}>
-                {order.order_status}
-              </Text>
-            </View>
-
-            <Text style={styles.orderDate}>Date: {order.order_date}</Text>
-            <Text style={styles.orderTotal}>Total: ${order.total_amount.toFixed(2)}</Text>
-
-            {/* Order Items */}
-            {orderItems[order.order_id] && orderItems[order.order_id].length > 0 ? (
-              <View style={styles.itemsTable}>
-                <View style={[styles.tableRow, styles.tableHeader]}>
-                  <Text style={[styles.tableCell, styles.cellFlex2]}>Product</Text>
-                  <Text style={styles.tableCell}>Qty</Text>
-                  <Text style={styles.tableCell}>Price</Text>
-                  <Text style={styles.tableCell}>Subtotal</Text>
+        <ScrollView showsVerticalScrollIndicator={false}>
+          {orders.map((order, index) => (
+            <View key={index} style={styles.orderCard}>
+              {/* Order Header */}
+              <View style={styles.orderHeader}>
+                <View>
+                  <Text style={styles.orderTitle}>Order #{order.order_id}</Text>
+                  <Text style={styles.orderDate}>{order.order_date}</Text>
                 </View>
+                <Text style={[styles.statusBadge, getStatusStyle(order.order_status)]}>
+                  {order.order_status.toUpperCase()}
+                </Text>
+              </View>
 
-                {orderItems[order.order_id].map((item, index) => (
-                  <View key={index} style={styles.tableRow}>
-                    <Text style={[styles.tableCell, styles.cellFlex2]}>{item.product_name}</Text>
-                    <Text style={styles.tableCell}>{item.quantity}</Text>
-                    <Text style={styles.tableCell}>${item.price.toFixed(2)}</Text>
-                    <Text style={styles.tableCell}>${(item.price * item.quantity).toFixed(2)}</Text>
+              {/* Shipping Info */}
+              <View style={styles.shippingBox}>
+                <Text style={styles.shippingIcon}>🚚</Text>
+                <View style={styles.shippingDetails}>
+                  <Text style={styles.shippingMethod}>{order.shipping_method}</Text>
+                  <Text style={styles.shippingEstimate}>
+                    Arrives in {order.estimated_days} days
+                  </Text>
+                </View>
+              </View>
+
+              {/* Order Items */}
+              <View style={styles.itemsSection}>
+                <Text style={styles.itemsTitle}>Items ({order.items.length})</Text>
+                {order.items.map((item, itemIndex) => (
+                  <View key={itemIndex} style={styles.itemRow}>
+                    <View style={styles.itemInfo}>
+                      <Text style={styles.itemName}>{item.product_name}</Text>
+                      <Text style={styles.itemDetails}>
+                        Qty: {item.quantity} × ${item.price.toFixed(2)}
+                      </Text>
+                    </View>
+                    <Text style={styles.itemTotal}>
+                      ${(item.price * item.quantity).toFixed(2)}
+                    </Text>
                   </View>
                 ))}
               </View>
-            ) : (
-              <Text style={styles.noItems}>No items found in this order.</Text>
-            )}
-          </View>
-        ))
+
+              {/* Order Total */}
+              <View style={styles.totalSection}>
+                <Text style={styles.totalLabel}>Total Amount</Text>
+                <Text style={styles.totalAmount}>${order.total_amount.toFixed(2)}</Text>
+              </View>
+
+              {/* Action Button */}
+              <TouchableOpacity
+                style={styles.viewDetailsBtn}
+                onPress={() => navigation.navigate('PlaceOrder', {
+                  orderData: order,
+                  orderItems: order.items
+                })}
+              >
+                <Text style={styles.viewDetailsBtnText}>View Order Details</Text>
+              </TouchableOpacity>
+            </View>
+          ))}
+        </ScrollView>
       )}
-    </ScrollView>
+    </View>
   );
 };
 
@@ -65,91 +130,217 @@ export default MyOrders;
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+    padding: 20,
   },
+
   heading: {
     fontSize: 22,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginBottom: 16,
+    color: '#1f2937'
   },
-  empty: {
-    textAlign: "center",
-    color: "gray",
-    paddingVertical: 20,
+
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: -50
   },
+
+  emptyIcon: {
+    fontSize: 64,
+    marginBottom: 16
+  },
+
+  emptyTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#1f2937',
+    marginBottom: 8
+  },
+
+  emptyText: {
+    fontSize: 14,
+    color: '#6b7280',
+    marginBottom: 24
+  },
+
+  shopBtn: {
+    backgroundColor: 'green',
+    paddingVertical: 14,
+    paddingHorizontal: 32,
+    borderRadius: 8
+  },
+
+  shopBtnText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600'
+  },
+
   orderCard: {
-    backgroundColor: "white",
-    padding: 16,
+    backgroundColor: 'white',
     borderRadius: 10,
+    padding: 16,
     marginBottom: 16,
-    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3
   },
+
   orderHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 8,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f3f4f6'
   },
+
   orderTitle: {
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: '600',
+    color: '#1f2937',
+    marginBottom: 4
   },
-  statusBadge: {
-    paddingVertical: 2,
-    paddingHorizontal: 8,
-    borderRadius: 12,
-    fontSize: 12,
-    fontWeight: "600",
-  },
-  statusCompleted: {
-    backgroundColor: "#d1fae5",
-    color: "#065f46",
-  },
-  statusPending: {
-    backgroundColor: "#fef3c7",
-    color: "#78350f",
-  },
-  statusOther: {
-    backgroundColor: "#fee2e2",
-    color: "#991b1b",
-  },
+
   orderDate: {
-    color: "#6b7280",
     fontSize: 13,
-    marginBottom: 4,
+    color: '#6b7280'
   },
-  orderTotal: {
-    fontSize: 15,
-    fontWeight: "500",
-    marginBottom: 12,
-  },
-  itemsTable: {
-    borderWidth: 1,
-    borderColor: "#e5e7eb",
+
+  statusBadge: {
+    paddingVertical: 4,
+    paddingHorizontal: 10,
     borderRadius: 6,
-    overflow: "hidden",
+    fontSize: 11,
+    fontWeight: '600'
   },
-  tableRow: {
-    flexDirection: "row",
-    paddingVertical: 6,
-    paddingHorizontal: 8,
-    borderBottomWidth: 1,
-    borderColor: "#e5e7eb",
+
+  statusCompleted: {
+    backgroundColor: '#d1fae5',
+    color: '#065f46'
   },
-  tableHeader: {
-    backgroundColor: "#f3f4f6",
+
+  statusPending: {
+    backgroundColor: '#dbeafe',
+    color: '#1e40af'
   },
-  tableCell: {
-    flex: 1,
+
+  statusOther: {
+    backgroundColor: '#fee2e2',
+    color: '#991b1b'
+  },
+
+  shippingBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f9fafb',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 12
+  },
+
+  shippingIcon: {
+    fontSize: 24,
+    marginRight: 12
+  },
+
+  shippingDetails: {
+    flex: 1
+  },
+
+  shippingMethod: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1f2937',
+    marginBottom: 2
+  },
+
+  shippingEstimate: {
     fontSize: 13,
-    color: "#374151",
+    color: '#6b7280'
   },
-  cellFlex2: {
-    flex: 2,
+
+  itemsSection: {
+    marginBottom: 12
   },
-  noItems: {
-    color: "#6b7280",
-    fontStyle: "italic",
-    marginTop: 8,
+
+  itemsTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1f2937',
+    marginBottom: 8
   },
+
+  itemRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f3f4f6'
+  },
+
+  itemInfo: {
+    flex: 1
+  },
+
+  itemName: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#1f2937',
+    marginBottom: 2
+  },
+
+  itemDetails: {
+    fontSize: 12,
+    color: '#6b7280'
+  },
+
+  itemTotal: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1f2937'
+  },
+
+  totalSection: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingTop: 12,
+    marginBottom: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#e5e7eb'
+  },
+
+  totalLabel: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#1f2937'
+  },
+
+  totalAmount: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: 'green'
+  },
+
+  viewDetailsBtn: {
+    backgroundColor: 'black',
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center'
+  },
+
+  viewDetailsBtnText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: '600'
+  }
 });
